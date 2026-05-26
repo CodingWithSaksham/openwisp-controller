@@ -4,9 +4,16 @@ on:
   push:
     branches:
       - "**"
+    paths-ignore:
+      - Dockerfile.ci
+      - requirements.txt
+      - requirements-test.txt
+  workflow_run:
+    workflows: ["Build CI Base Image"]
+    types:
+      - completed
   pull_request:
     branches:
-      - "*"
       - master
       - "1.1"
       - "1.2"

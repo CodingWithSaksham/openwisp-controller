@@ -42,6 +42,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Compute lowercase repository name
+        id: repo
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -52,8 +56,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/${{ github.repository }}/ci-base:latest
-            ghcr.io/${{ github.repository }}/ci-base:sha-${{ github.sha }}
+            ghcr.io/${{ steps.repo.outputs.name }}/ci-base:latest
+            ghcr.io/${{ steps.repo.outputs.name }}/ci-base:sha-${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -61,6 +65,7 @@ jobs:
 
       - name: Verify image
         run: |
-          docker pull ghcr.io/${{ github.repository }}/ci-base:latest
-          docker run --rm ghcr.io/${{ github.repository }}/ci-base:latest \
+          REPO="${GITHUB_REPOSITORY,,}"
+          docker pull "ghcr.io/${REPO}/ci-base:latest"
+          docker run --rm "ghcr.io/${REPO}/ci-base:latest" \
             bash -c "gdal-config --version && node --version && prettier --version"
