@@ -92,7 +92,7 @@ jobs:
           npm install -g prettier
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
           cache-dependency-glob: "**/requirements*.txt"
@@ -169,7 +169,7 @@ jobs:
             libspatialite-dev spatialite-bin libsqlite3-mod-spatialite
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
           cache-dependency-glob: "**/requirements*.txt"
