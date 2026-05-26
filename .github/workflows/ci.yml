@@ -3,9 +3,10 @@ name: OpenWISP Controller CI Build
 on:
   push:
     branches:
-      - "*"
+      - "**"
   pull_request:
     branches:
+      - "*"
       - master
       - "1.1"
       - "1.2"
@@ -15,6 +16,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+permissions:
+  contents: read
+  packages: read
+  pull-requests: write
 
 jobs:
   # Quickly checks whether our pre-built GHCR image is available.
@@ -44,8 +50,8 @@ jobs:
             echo "image_tag=$IMAGE"    >> $GITHUB_OUTPUT
             echo "use_prebuilt=true"  >> $GITHUB_OUTPUT
           else
-            echo "Pre-built image not found, falling back to ubuntu:24.04"
-            echo "image_tag=ubuntu:24.04" >> $GITHUB_OUTPUT
+            echo "Pre-built image not found, falling back to ghcr.io/catthehacker/ubuntu:act-24.04"
+            echo "image_tag=ghcr.io/catthehacker/ubuntu:act-24.04" >> $GITHUB_OUTPUT
             echo "use_prebuilt=false"     >> $GITHUB_OUTPUT
           fi
 
@@ -63,6 +69,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha}}
+          persist-credentials: false
 
       - name: Install system deps (fallback)
         if: needs.check-image.outputs.use_prebuilt != 'true'
@@ -135,6 +142,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha}}
+          persist-credentials: false
 
       - name: Install system deps (fallback)
         if: needs.check-image.outputs.use_prebuilt != 'true'
@@ -226,6 +234,8 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v6
         with:
@@ -235,7 +245,8 @@ jobs:
         run: pip install coverage
 
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
+        continue-on-error: true
         with:
           pattern: coverage-*
           path: coverage_parts
@@ -243,7 +254,10 @@ jobs:
 
       - name: Combine and generate XML report
         run: |
-          ls -la coverage_parts/
+          if [ -z "$(ls -A coverage_parts 2>/dev/null)" ]; then
+            echo "No coverage artifacts found, skipping."
+            exit 0
+          fi
           coverage combine coverage_parts/
           coverage xml
 
