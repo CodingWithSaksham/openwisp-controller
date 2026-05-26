@@ -1,0 +1,30 @@
+# Node Docker image is just debian bookworm-slim underneath
+FROM node:lts-bookworm-slim
+
+RUN npm install -g --prefer-offline prettier@3.8.3 \
+  && npm cache clean --force
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  gdal-bin \
+  sqlite3 \
+  libsqlite3-mod-spatialite \
+  spatialite-bin \
+  libgeos-c1v5 \
+  libspatialite-dev \
+  git \
+  curl \
+  ca-certificates \
+  xz-utils \
+  libstdc++6 \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /usr/share/man /usr/share/doc
+
+RUN gdal-config --version \
+  && node --version \
+  && prettier --version \
+  && python3 -c "import ctypes; ctypes.CDLL('mod_spatialite.so')" 2>/dev/null || true
+
+CMD ["/bin/bash"]
