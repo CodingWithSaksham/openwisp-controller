@@ -70,4 +70,4 @@ jobs:
           REPO="${GITHUB_REPOSITORY,,}"
           docker pull "ghcr.io/${REPO}/ci-base:latest"
           docker run --rm "ghcr.io/${REPO}/ci-base:latest" \
-            bash -c "gdal-config --version && node --version && prettier --version"
+            bash -c "gdalinfo --version && node --version && prettier --version"

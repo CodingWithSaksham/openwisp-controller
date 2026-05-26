@@ -8,6 +8,7 @@ on:
       - Dockerfile.ci
       - requirements.txt
       - requirements-test.txt
+      - .github/workflows/build-ci-image.yml
   workflow_run:
     workflows: ["Build CI Base Image"]
     types:
