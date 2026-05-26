@@ -10,19 +10,21 @@ on:
       - Dockerfile.ci
       - requirements-test.txt
       - requirements.txt
+      - .github/workflows/build-ci-image.yml
   workflow_dispatch:
 
 concurrency:
   group: build-ci-image-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     name: Build and push CI base image to GHCR
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v6
