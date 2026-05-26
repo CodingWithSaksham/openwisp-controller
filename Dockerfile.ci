@@ -24,11 +24,4 @@ RUN gdalinfo --version \
   && node --version \
   && prettier --version
 
-# GitHub-hosted runners mount their tool cache (/opt/hostedtoolcache on the host)
-# into job containers at /__t. Pythons the runner pre-baked into that cache carry
-# absolute interpreter paths to /opt/hostedtoolcache, which doesn't exist inside
-# the container, so actions/setup-python "succeeds" but pip/coverage console
-# scripts fail with "not found". This symlink makes those baked paths resolve.
-RUN mkdir -p /opt && ln -s /__t /opt/hostedtoolcache
-
 CMD ["/bin/bash"]
