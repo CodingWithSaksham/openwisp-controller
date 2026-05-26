@@ -15,8 +15,6 @@ RUN apt-get update \
   libgeos-c1v5 \
   libspatialite-dev \
   lsb-release \
-  git \
-  curl \
   ca-certificates \
   xz-utils \
   libstdc++6 \
@@ -27,7 +25,5 @@ RUN gdal-config --version \
   && node --version \
   && prettier --version \
   && python3 -c "import ctypes; ctypes.CDLL('mod_spatialite.so')"
-
-RUN apt-get purge git curl 
 
 CMD ["/bin/bash"]
