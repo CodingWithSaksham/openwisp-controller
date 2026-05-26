@@ -101,7 +101,7 @@ jobs:
         run: |
           uv venv --python 3.12 /opt/venv
           echo "/opt/venv/bin" >> "$GITHUB_PATH"
-          uv pip install --python /opt/venv -r requirements-test.txt
+          uv pip install --python /opt/venv -r requirements-test.txt -e .
 
       - name: Run QA checks
         run: ./run-qa-checks
