@@ -14,6 +14,7 @@ RUN apt-get update \
   spatialite-bin \
   libgeos-c1v5 \
   libspatialite-dev \
+  lsb-release \
   git \
   curl \
   ca-certificates \
