@@ -5,7 +5,7 @@ name: Build CI Base Image
 on:
   push:
     branches:
-      - master
+      - "**"
     paths:
       - Dockerfile.ci
       - requirements-test.txt
