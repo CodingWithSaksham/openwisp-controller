@@ -86,15 +86,13 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           apt-get update -qq
-          apt-get install -y --no-install-recommends nodejs npm python3 python3-pip lsp-release
+          apt-get install -y --no-install-recommends nodejs npm python3 python3-pip
           npm install -g prettier
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: "**/requirements*.txt"
 
       - name: Install Python QA dependencies
         run: |
@@ -167,8 +165,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: "**/requirements*.txt"
 
       - name: Install Python dependencies
         id: deps
