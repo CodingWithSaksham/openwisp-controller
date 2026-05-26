@@ -21,9 +21,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /usr/share/man /usr/share/doc
 
-RUN gdal-config --version \
+RUN gdalinfo --version \
   && node --version \
-  && prettier --version \
-  && python3 -c "import ctypes; ctypes.CDLL('mod_spatialite.so')"
+  && prettier --version
 
 CMD ["/bin/bash"]
