@@ -97,9 +97,9 @@ jobs:
 
       - name: Set up Python and QA dependencies
         run: |
-          uv venv --python 3.12
-          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
-          uv pip install -r requirements-test.txt
+          uv venv --python 3.12 /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          uv pip install --python /opt/venv -r requirements-test.txt
 
       - name: Run QA checks
         run: ./run-qa-checks
@@ -172,9 +172,9 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }} and dependencies
         id: deps
         run: |
-          uv venv --python ${{ matrix.python-version }}
-          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
-          uv pip install -r requirements-test.txt -e . "${{ matrix.django-version }}"
+          uv venv --python ${{ matrix.python-version }} /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
+          uv pip install --python /opt/venv -r requirements-test.txt -e . "${{ matrix.django-version }}"
 
       - name: Run standard tests
         if: ${{ !cancelled() && steps.deps.conclusion == 'success' && matrix.test-group == 'standard' }}
