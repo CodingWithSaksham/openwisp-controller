@@ -78,19 +78,20 @@ jobs:
             is_master=false
           fi
 
-          # df_changed: whether Dockerfile.ci differs from origin/master
+          # build_changed: whether Dockerfile.ci, requirements.txt, or
+          # requirements-test.txt differ from origin/master.
           # Always false on master itself (promote-stable handles it separately)
           if [[ "$is_master" == "true" ]]; then
-            df_changed=false
+            build_changed=false
           else
-            if git diff --quiet origin/master -- Dockerfile.ci 2>/dev/null; then
-              df_changed=false
+            if git diff --quiet origin/master -- Dockerfile.ci requirements.txt requirements-test.txt 2>/dev/null; then
+              build_changed=false
             else
-              df_changed=true
+              build_changed=true
             fi
           fi
 
-          echo "can_push=$can_push  is_master=$is_master  df_changed=$df_changed"
+          echo "can_push=$can_push  is_master=$is_master  build_changed=$build_changed"
           echo "IMAGE=$IMAGE  BRANCH_TAG=$BRANCH_TAG"
 
           # Decision logic
@@ -112,9 +113,9 @@ jobs:
             echo "image_tag=$IMAGE:stable"     >> "$GITHUB_OUTPUT"
             echo "use_prebuilt=true"           >> "$GITHUB_OUTPUT"
             echo "needs_build=false"           >> "$GITHUB_OUTPUT"
-          elif [[ "$df_changed" == "true" ]]; then
-            # Branch has a modified Dockerfile.ci: build a branch-specific image
-            echo "Dockerfile.ci changed: will build branch image $IMAGE:$BRANCH_TAG"
+          elif [[ "$build_changed" == "true" ]]; then
+            # Branch has modified Dockerfile.ci, requirements.txt, or requirements-test.txt: build a branch-specific image
+            echo "Build files changed: will build branch image $IMAGE:$BRANCH_TAG"
             echo "image_tag=$IMAGE:$BRANCH_TAG" >> "$GITHUB_OUTPUT"
             echo "use_prebuilt=true"            >> "$GITHUB_OUTPUT"
             echo "needs_build=true"             >> "$GITHUB_OUTPUT"
@@ -135,12 +136,13 @@ jobs:
           echo "branch_image=$IMAGE:$BRANCH_TAG" >> "$GITHUB_OUTPUT"
           echo "image=$IMAGE"                     >> "$GITHUB_OUTPUT"
 
-  # Build and push a per-branch image when Dockerfile.ci differs from master.
-  # Job always runs (so qa/test needs are always satisfied); the build step is
-  # gated on needs_build == 'true'.
+  # Build and push a per-branch image when Dockerfile.ci, requirements.txt, or
+  # requirements-test.txt differ from master.  The whole job is skipped when
+  # needs_build is false; qa/test tolerate a skipped result via != 'failure'.
   build-image:
     name: Build CI base image (branch)
     needs: resolve-image
+    if: ${{ needs.resolve-image.outputs.needs_build == 'true' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -168,6 +170,11 @@ jobs:
           context: .
           file: Dockerfile.ci
           push: true
+          # Single manifest (no provenance/SBOM attestations) so the
+          # untagged-version cleanup below can't delete child manifests
+          # that the tagged image depends on.
+          provenance: false
+          sbom: false
           tags: ${{ needs.resolve-image.outputs.branch_image }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -222,6 +229,8 @@ jobs:
           context: .
           file: Dockerfile.ci
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ needs.resolve-image.outputs.image }}:stable
           cache-from: type=gha
           cache-to: type=gha,mode=max
