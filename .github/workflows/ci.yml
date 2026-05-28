@@ -402,13 +402,14 @@ jobs:
           SELENIUM_HEADLESS: 1
           GECKO_LOG: 1
           REDIS_URL: redis://localhost:6379/0
+          HOME: /root
         run: |
           coverage run runtests.py --tag=selenium_tests --no-input --exclude-pytest
           coverage combine
 
       - name: Upload geckodriver logs on failure
         if: ${{ (failure() || cancelled()) && matrix.test-group == 'selenium' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: geckodriver-logs-py${{ matrix.python-version }}-${{ matrix.django-version }}
           path: geckodriver*.log
@@ -437,7 +438,7 @@ jobs:
           success() &&
           matrix.python-version == '3.13' &&
           matrix.django-version == 'django~=5.2.0'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.test-group }}
           path: .coverage.${{ matrix.test-group }}
